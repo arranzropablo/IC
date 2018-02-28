@@ -38,7 +38,7 @@ $(function(){
                         selectedCell.html("")
                     } else {
                         selectedCell.css({'text-align': 'center'})
-                        selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="end" height="50" width="50">')
+                        selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="mountain" height="50" width="50">')
                     }
                }
                 break
@@ -50,7 +50,7 @@ $(function(){
                         selectedCell.attr("data-height", 1)
                     }
                     selectedCell.css({'text-align': 'center'})
-                    selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="end" height="50" width="50">')
+                    selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="mountain" height="50" width="50">')
                 }
                 break
         }
@@ -113,7 +113,7 @@ $(function(){
     })
 
     $(document).on("dblclick", "td", function(){
-        if($(this).find("img").length === 0){
+        if($(this).find("img").length === 0 || $($(this).find("img")).attr("id") === "mountain"){
             selectedCell = $(this)
         } else {
             selectedCell = undefined
@@ -162,7 +162,6 @@ $(function(){
 
 })
 
-//añadir altura en la matriz pero no se cuanod se suma
 function encontrarCamino(matriz, casillaInicial, casillaFinal){
     //casilla inicial
     //Creo q lo de estado no hace falta guardarlo porque solo se van a transformar aquellas q son libres
@@ -188,10 +187,11 @@ function encontrarCamino(matriz, casillaInicial, casillaFinal){
                     !isInList(casilla.row + i, casilla.column + j, cerrada) &&
                     !(i === 0 && j === 0) &&
                     matriz[casilla.row + i][casilla.column + j] !== "obstacle"){
+                    penalizacionAltura = $($($("tr")[casilla.row + i]).children("td")[casilla.column + j]).attr("data-height") === undefined ? 0 : Number($($($("tr")[casilla.row + i]).children("td")[casilla.column + j]).attr("data-height"))
                     matriz[casilla.row + i][casilla.column + j] = {
                         estado: matriz[casilla.row + i][casilla.column + j],
                         dEstimada: Math.sqrt(Math.pow((casilla.row + i) - casillaFinal.row,2) + Math.pow((casilla.column + j) - casillaFinal.column,2)),
-                        dAcumulada: matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j)),
+                        dAcumulada: matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j)) + penalizacionAltura,
                         apuntando: casilla
                     }
                     abierta.push({row: casilla.row + i, column: casilla.column + j})
@@ -200,8 +200,9 @@ function encontrarCamino(matriz, casillaInicial, casillaFinal){
                     })
                 } else if (isInList(casilla.row + i, casilla.column + j, abierta) || isInList(casilla.row + i, casilla.column + j, cerrada)){
                     //comprueba distancias acumuladas y reordena si la nueva es mas optima
-                    if ((matriz[casilla.row + i])[casilla.column + j].dAcumulada > matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j))){
-                        matriz[casilla.row + i][casilla.column + j].dAcumulada = matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j))
+                    penalizacionAltura = $($($("tr")[casilla.row + i]).children("td")[casilla.column + j]).attr("data-height") === undefined ? 0 : Number($($($("tr")[casilla.row + i]).children("td")[casilla.column + j]).attr("data-height"))
+                    if ((matriz[casilla.row + i])[casilla.column + j].dAcumulada > matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j)) + penalizacionAltura){
+                        matriz[casilla.row + i][casilla.column + j].dAcumulada = matriz[casilla.row][casilla.column].dAcumulada + Math.hypot(casilla.row - (casilla.row + i), casilla.column - (casilla.column + j)) + penalizacionAltura
                         matriz[casilla.row + i][casilla.column + j].apuntando = casilla
                         updateNodosDependientes(matriz, abierta, cerrada, {row: casilla.row + i, column: casilla.column + j})
                         abierta.sort((a, b) => {
