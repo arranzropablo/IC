@@ -1,5 +1,6 @@
 $(function(){
-    let action
+    var action
+    var selectedCell
 
     $(".resize").on("click", function(){
         let numcolumns = ($($("tr")[0]).children("td").length)
@@ -29,19 +30,58 @@ $(function(){
                     }
                 }
                 break
+            case "decreaseheight":
+                if (selectedCell !== undefined && selectedCell.attr("data-height") !== undefined && Number(selectedCell.attr("data-height")) > 0){
+                    selectedCell.attr("data-height", Number(selectedCell.attr("data-height")) - 1)
+                    if (Number(selectedCell.attr("data-height")) === 0){
+                        selectedCell.css({'text-align': 'center'})
+                        selectedCell.html("")
+                    } else {
+                        selectedCell.css({'text-align': 'center'})
+                        selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="end" height="50" width="50">')
+                    }
+               }
+                break
+            case "increaseheight":
+                if (selectedCell !== undefined && (selectedCell.attr("data-height") === undefined || Number(selectedCell.attr("data-height")) < 3)) {
+                    if (selectedCell.attr("data-height") !== undefined){
+                        selectedCell.attr("data-height", Number(selectedCell.attr("data-height")) + 1)
+                    } else {
+                        selectedCell.attr("data-height", 1)
+                    }
+                    selectedCell.css({'text-align': 'center'})
+                    selectedCell.html('<img src="images/mountain_' + selectedCell.attr("data-height") + '.svg" id="end" height="50" width="50">')
+                }
+                break
         }
     })
 
     $("#obstaclebutton").on("click", function(){
-        action="obstacle"
+        if (action === "obstacle"){
+            action = undefined
+        } else {
+            action="obstacle"
+            selectedCell = undefined
+        }
     })
 
     $("#startbutton").on("click", function(){
-        action="start"
+        if (action === "start"){
+            action = undefined
+        } else {
+            action="start"
+            selectedCell = undefined
+
+        }
     })
 
     $("#endbutton").on("click", function(){
-        action="end"
+        if (action === "end"){
+            action = undefined
+        } else {
+            action="end"
+            selectedCell = undefined
+        }
     })
 
     $(document).on("click", "td", function(){
@@ -69,6 +109,14 @@ $(function(){
                 $(this).css({'text-align': 'center'})
                 $(this).html('<img src="images/end.svg" id="end" height="50" width="50">')
                 break
+        }
+    })
+
+    $(document).on("dblclick", "td", function(){
+        if($(this).find("img").length === 0){
+            selectedCell = $(this)
+        } else {
+            selectedCell = undefined
         }
     })
 
@@ -114,7 +162,7 @@ $(function(){
 
 })
 
-
+//añadir altura en la matriz pero no se cuanod se suma
 function encontrarCamino(matriz, casillaInicial, casillaFinal){
     //casilla inicial
     //Creo q lo de estado no hace falta guardarlo porque solo se van a transformar aquellas q son libres
@@ -240,14 +288,14 @@ function createMatrix(){
     for(let i = 0; i < numrows; i++){
         matriz[i] = []
         for(let j = 0; j < numcolumns; j++){
-            if($($($("tr")[i]).children("td")[j]).children("img").length === 0){
-                matriz[i][j] = "libre"
-            } else if ($($($($("tr")[i]).children("td")[j]).children("img")[0]).attr("id") === "start"){
+            if ($($($($("tr")[i]).children("td")[j]).children("img")[0]).attr("id") === "start"){
                 matriz[i][j] = "start"
             } else if ($($($($("tr")[i]).children("td")[j]).children("img")[0]).attr("id") === "end"){
                 matriz[i][j] = "end"
             } else if ($($($($("tr")[i]).children("td")[j]).children("img")[0]).attr("id") === "obstacle"){
                 matriz[i][j] = "obstacle"
+            } else {
+                matriz[i][j] = "libre"
             }
         }
     }
