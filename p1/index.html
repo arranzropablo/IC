@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <title>Algoritmo A*</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+        <script src="script.js"></script>
+        <link rel="icon" href="images/star.ico">
+    </head>
+    <body>
+        <div id="board">
+            <table>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div id="controls">
+            <div>
+                <div class="sizeControls">
+                    <p>Filas</p>
+                    <span>
+                        <button class="resize" id="addrow">+</button>
+                        <button class="resize" id="deleterow">-</button>
+                    </span>
+                </div>
+                <div class="sizeControls">
+                    <p>Columnas</p>
+                    <span>
+                        <button class="resize" id="addcolumn">+</button>
+                        <button class="resize" id="deletecolumn">-</button>
+                    </span>
+                </div>
+            </div>
+            <button id="obstaclebutton">
+                Colocar/Borrar obstaculos
+            </button>
+            <button id="startbutton">
+                Colocar inicio
+            </button>
+            <button id="endbutton">
+                Colocar meta
+            </button>
+            <button id="findRoutebutton">
+                Encontrar ruta
+            </button>
+        </div>
+    </body>
+</html>
