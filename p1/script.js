@@ -163,8 +163,6 @@ $(function(){
 })
 
 function encontrarCamino(matriz, casillaInicial, casillaFinal){
-    //casilla inicial
-    //Creo q lo de estado no hace falta guardarlo porque solo se van a transformar aquellas q son libres
     matriz[casillaInicial.row][casillaInicial.column] = {
         estado: matriz[casillaInicial.row][casillaInicial.column],
         dEstimada: Math.sqrt(Math.pow(casillaInicial.row - casillaFinal.row,2) + Math.pow(casillaInicial.column - casillaFinal.column,2)),
