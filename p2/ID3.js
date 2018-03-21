@@ -1,6 +1,8 @@
 var path = require("path");
 var fs = require('fs');
 var _ = require('underscore');
+var Node = require("tree-node");
+var draw_tree = require('asciitree');
 
 var files = ["AtributosJuego.txt", "Juego.txt"];
 
@@ -9,21 +11,94 @@ if(process.argv.length === 4){
 }
 
 let atributos = readAndParseToArray(files[0]);
-
 let data = readAndParseToArray(files[1]);
-
 let decision = atributos[atributos.length - 1];
 
 if(data.length !== 0 && atributos.length !== 0){
     let trainingData = parseArrayToTrainingData(atributos, data);
-    calculaMerito(atributos, trainingData);
+    let node = new Node();
+    let printable = [];
+    ID3(atributos, trainingData, node);
+    //esto tiene qe qedar
+    console.log(draw_tree(["________tiempo exterior",["soleado",["humedad",["alta", "-"], ["normal", "+"]]],
+                            ["nublado", "+"],
+                            ["lluvioso",["viento", ["falso", "+"],["verdad", "-"]]]]));
+    transformNodesToPrintable(node.json.childs[node.json.childIdsList[0]], printable);
 }
 
 /* Funciones (debería modularizarlo a un fichero de utils/IO */
 
-function calculaMerito(atributos, trainingData){
-    let claves = atributos.splice(0, atributos.length - 1);
-    let meritos = {}
+function transformNodesToPrintable(tree, printable){
+    //si todos los hijos tienen - o + hacemos un array con todos y pa pribtable
+    //tree.childs.map(child => child.data())
+    //let claveshijos = tree.childIdsList;
+    //let hijos = tree.childs;
+    //let primerhijo = tree.childs[claveshijos[0]];
+    //let dataprimerhijo = primerhijo.data;
+
+    if (tree.childIdsList.every(childkey => tree.childs[childkey].data.name === "+" || tree.childs[childkey].data.name === "-" || tree.childs[childkey].data.name === "no data")) {
+        printable.push(tree.data.name);
+        let leafs = tree.childIdsList.forEach(childkey => printable.push([tree.childs[childkey].data.comingFrom, tree.childs[childkey].data.name]));
+        //aqui pinto las hojas
+        /*
+
+             root
+            /    \
+          alta normal
+            |     |
+            -     +
+
+        printable.push("root");
+        leafs.forEach(leaf => printable.push(leaf));
+        console.log(printable);
+        console.log(draw_tree(printable));
+        */
+    } else if (tree.data.name === "+" || tree.data.name === "-" || tree.data.name === "no data") {
+        printable.push(tree.data.name);
+    } else {
+        tree.childIdsList.forEach(childkey => {
+            //pintarme en un papel como tiene q qedar el array para hacerlo
+            transformNodesToPrintable(tree.childs[childkey],printable)
+        });
+    }
+}
+
+function ID3(atributos, trainingData, node, comingFrom){
+    let newNode = new Node();
+    newNode.data("comingFrom", comingFrom);
+    node.appendChild(newNode);
+
+    if(trainingData.length <= 0){
+        newNode.data("name", "no data");
+        newNode.data("branches", []);
+
+    } else if (trainingData.every(data => data[decision].toUpperCase() === "SI")){
+        newNode.data("name", "+");
+        newNode.data("branches", []);
+
+    } else if (trainingData.every(data => data[decision].toUpperCase() === "NO")){
+        newNode.data("name", "-");
+        newNode.data("branches", []);
+
+    } else {
+        let meritos = calculaMeritos(atributos, trainingData);
+        let min = {merito: Number.MAX_SAFE_INTEGER};
+        meritos.forEach(val => {
+            if (val.merito < min.merito){
+                min = val;
+            }
+        });
+        newNode.data("name", min.name);
+        newNode.data("branches", min.branches);
+        min.branches.forEach(branch =>{
+            ID3(atributos.filter(attr => attr.toUpperCase() !== min.name.toUpperCase()), trainingData.filter(data => data[min.name].toUpperCase() === branch.toUpperCase()), newNode, branch);
+        });
+    }
+}
+
+function calculaMeritos(atributos, trainingData){
+    let claves = atributos.slice(0, atributos.length - 1);
+    let meritos = [];
     claves.forEach(clave => {
         let branches = _.uniq(trainingData.map(element => element[clave]));
         let merito = 0;
@@ -34,13 +109,9 @@ function calculaMerito(atributos, trainingData){
             let r = a / trainingData.length;
             merito += (r *entropia(p, n));
         })
-        meritos[clave] = merito;
-        //meritos[clave] = ri * entropia(p, n);
-    })
-    /*
-    merito = {}
-    trainingData
-    */
+        meritos.push({name: clave, merito: merito, branches: branches});
+    });
+    return meritos;
 }
 
 function entropia(p, n){
@@ -48,10 +119,7 @@ function entropia(p, n){
 }
 
 function fixedLog(number){
-    let aasd = Math.log2(number)
-    //ver como puedo hacer para no devolver un valor concreto... sino devolver algo concreto porqe se va a multiplicar * 0
-    let fasafa = aasd === -Infinity ? Number.NEGATIVE_INFINITY : Math.log2(number)
-    return fasafa;
+    return Math.log2(number) === -Infinity ? Number.MAX_SAFE_INTEGER : Math.log2(number)
 }
 
 function parseArrayToTrainingData(atributos, data){
