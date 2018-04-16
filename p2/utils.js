@@ -36,18 +36,33 @@ module.exports = {
     },
 
     parseArrayToTrainingData: function (atributos, data){
-    let trainingData = [];
-    for (let i = 0; i < data.length - atributos.length + 1; i++){
-        let trainingItem = {};
-        for (let j = 0; j < atributos.length; j++){
-            trainingItem[atributos[j]] = data[i];
-            i++;
+        let trainingData = [];
+        for (let i = 0; i < data.length - atributos.length + 1; i++){
+            let trainingItem = {};
+            for (let j = 0; j < atributos.length; j++){
+                trainingItem[atributos[j]] = data[i];
+                i++;
+            }
+            i--;
+            trainingData.push(trainingItem);
         }
-        i--;
-        trainingData.push(trainingItem);
+        return trainingData;
+    },
+
+    guessResult: function (atributos, arbol){
+        atributos = atributos.map(atrib => atrib.toUpperCase());
+        for(branch in arbol.data.branches){
+            if(atributos.indexOf(arbol.data.branches[branch].toUpperCase()) !== -1){
+                let childid = arbol.childIdsList.filter(id => arbol.childs[id].data.comingFrom.toUpperCase() === arbol.data.branches[branch].toUpperCase());
+                if(arbol.childs[childid].data.name === "+" || arbol.childs[childid].data.name === "-" || arbol.childs[childid].data.name === "no data"){
+                    return arbol.childs[childid].data.name;
+                } else {
+                    atributos.splice(atributos.indexOf(arbol.data.branches[branch].toUpperCase()), 1);
+                    return this.guessResult(atributos, arbol.childs[childid])
+                }
+            }
+        }
     }
-    return trainingData;
-}
 
 }
 
