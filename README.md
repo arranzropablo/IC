@@ -1,4 +1,4 @@
-# IC
+# Ingeniería del conocimiento
 Repositorio para la asignatura Ingenieria del conocimiento. Contiene 3 prácticas con contenido relacionado con inteligencia artificial y machine learning no supervisado (clustering).
 
 Todas las prácticas contienen una pequeña memoria en su carpeta correspondiente (en español), además del guión proporcionado en la asignatura con los requisitos.
