@@ -38,7 +38,6 @@ do
       endfor
 
       v(i, :) = sum(dividendo) / sum(divisor); %quizas elem por elem
-
     endfor
 
   until (norma(v(1,:), v_anterior(1,:)) < epsilon && norma(v(2,:), v_anterior(2,:)) < epsilon)

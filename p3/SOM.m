@@ -1,25 +1,34 @@
-function [C1, C2] = bayes()
+function v = som()
 
-  data = load("Iris2Clases.txt");
-  y = data(:,end);
-  data(:,end) = [];
-  X = data;
-  K = 2;
+    data = load("Iris2Clases.txt");
+    y = data(:,end);
+    data(:,end) = [];
+    X = data;
+    K = 2;
+    epsilon = 10^-6;
+    iter = 0;
+    maxiter = 1000;
+    alpha_init = 0.1;
+    alpha_final = 0.01;
+    aprendizaje = 0.1;
+    T = 10^-5;
+    v = [4.6, 3.0, 4.0, 0.0 ; 6.8, 3.4, 4.6, 0.7];
 
-  idx = find(y == 0);
-  X1 = X(idx, :);
-  idx = find(y == 1);
-  X2 = X(idx, :);
+    do
+        iter += 1;
+        for i = 1:rows(X)
+            v_ant = v;
+            for j = 1:K
+                k = vecindad(alpha_init, alpha_final, X(i,:), v(j,:), iter, maxiter);
+                
+                if(k > T)
+                    v(j,:) = v(j,:) + aprendizaje * k * (X(i,:) - v(j,:));
+                endif
+            endfor
 
-  %Calculo de m
-  m1 = sum(X1) ./ rows(X1);
-  m2 = sum(X2) ./ rows(X2);
+        endfor
+    until (iter >= maxiter || (abs(v(1,:) - v_ant(1,:)) < epsilon && abs(v(2,:) - v_ant(2,:)) < epsilon))
 
-  %Calculo de C
-  C1 = ((X1-m1)' * (X1 - m1)) ./ rows(X1);
-  C2 = ((X2-m2)' * (X2 - m2)) ./ rows(X2);
-
-%Cargamos los 3 datos de ejemplo y comprobamos a que clase pertenece cada uno
     data = [];
     X = [];
     data(1,:) = load("TestIris01.txt");
@@ -30,7 +39,16 @@ function [C1, C2] = bayes()
     data(:,end) = [];
     X = data;
 
-%no se calcular la verosimilitud, de momento devuelvo los centros? (no se si tienen q dar 4x4)
-    verosimilitud = (1/((2*pi)* det(C1)^(1/2)))*exp((-1/2)*((X-m1) * pinv(C1)) * (X - m1)');
+    for i = 1:rows(X)
+        if(norma(X(i,:), v(1,:)) < norma(X(i,:), v(2,:)) && y(i,:) == 0)
+            printf("is: Iris-setosa ; classified as: Iris-setosa ; \t right \n");
+        elseif (norma(X(i,:), v(1,:)) < norma(X(i,:), v(2,:)) && y(i,:) == 1)
+            printf("is: Iris-versicolor ; classified as: Iris-setosa ; \t wrong \n");
+        elseif (norma(X(i,:), v(1,:)) >= norma(X(i,:), v(2,:)) && y(i,:) == 1)
+            printf("is: Iris-versicolor ; classified as: Iris-versicolor ; \t right \n");
+        elseif (norma(X(i,:), v(1,:)) >= norma(X(i,:), v(2,:)) && y(i,:) == 0)
+            printf("is: Iris-setosa ; classified as: Iris-versicolor ; \t wrong \n");
+        endif
+    endfor
 
 endfunction

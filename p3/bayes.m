@@ -1,4 +1,4 @@
-function [C1, C2, verosimilitud] = bayes()
+function [C1, C2] = bayes()
 
     data = load("Iris2Clases.txt");
     y = data(:,end);
@@ -30,19 +30,27 @@ function [C1, C2, verosimilitud] = bayes()
     data(:,end) = [];
     X = data;
 
-    primeraparte = 1 / ( ((2*pi)^(columns(X)/2)) * (det(C1)^(1/2)));
-    segundaparte = exp( (-1/2)* (X(1,:) - m1) * pinv(C1) * (X(1,:) - m1)');
-    %no se calcular la verosimilitud, de momento devuelvo los centros? (no se si tienen q dar 4x4)
-    verosimilitud = primeraparte*segundaparte;
 
-    printf("verosimilitud clase 1: %f\n ", verosimilitud);
+    for i = 1:rows(X)
+        verosimilitud(1,:) = (1 / ( ((2*pi)^(columns(X)/2)) * (det(C1)^(1/2))))*exp( (-1/2)* (X(i,:) - m1) * pinv(C1) * (X(i,:) - m1)');
+        verosimilitud(2,:) = (1 / ( ((2*pi)^(columns(X)/2)) * (det(C2)^(1/2))))*exp( (-1/2)* (X(i,:) - m2) * pinv(C2) * (X(i,:) - m2)');
 
-    primeraparte = 1 / ( ((2*pi)^(columns(X)/2)) * (det(C2)^(1/2)));
-    segundaparte = exp( (-1/2)* (X(1,:) - m2) * pinv(C2) * (X(1,:) - m2)');
-    %no se calcular la verosimilitud, de momento devuelvo los centros? (no se si tienen q dar 4x4)
-    verosimilitud = primeraparte*segundaparte;
+        %normalizamos las verosimilitudes
+        sumaverosimilitud = verosimilitud(1) + verosimilitud(2);
 
-    printf("verosimilitud clase 2: %f\n", verosimilitud);
+        verosimilitud(1,:) = verosimilitud(1) / sumaverosimilitud;
+        verosimilitud(2,:) = verosimilitud(2) / sumaverosimilitud;
+
+        if (verosimilitud(1,:) > verosimilitud(2,:) && y(i,:) == 0)
+        printf("is: Iris-setosa ; classified as: Iris-setosa ; \t right \n");
+        elseif (verosimilitud(1,:) > verosimilitud(2,:) && y(i,:) == 1)
+        printf("is: Iris-versicolor ; classified as: Iris-setosa ; \t wrong \n");
+        elseif (verosimilitud(1,:) <= verosimilitud(2,:) && y(i,:) == 1)
+        printf("is: Iris-versicolor ; classified as: Iris-versicolor ; \t right \n");
+        elseif (verosimilitud(1,:) <= verosimilitud(2,:) && y(i,:) == 0)
+        printf("is: Iris-setosa ; classified as: Iris-versicolor ; \t wrong \n");
+        endif
+    endfor
 
 
 endfunction

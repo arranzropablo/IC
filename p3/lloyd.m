@@ -1,4 +1,4 @@
-function [C1, C2] = lloyd()
+function v = lloyd()
 
     data = load("Iris2Clases.txt");
     y = data(:,end);
