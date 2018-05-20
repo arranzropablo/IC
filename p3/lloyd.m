@@ -12,8 +12,8 @@ function v = lloyd()
     v = [4.6, 3.0, 4.0, 0.0 ; 6.8, 3.4, 4.6, 0.7];
     %para el primer ejemplo cogemos la minima distancia entre los dos centros
     do
+        v_ant = v;
         for i = 1:rows(X)
-            v_ant = v;
             if(norma(X(i,:), v(1,:)) < norma(X(i,:), v(2,:)))
                 v(1,:) = v(1,:) + alpha*(X(i,:) - v(1,:));
             else
@@ -21,8 +21,8 @@ function v = lloyd()
             endif
         endfor
         iter += 1;
-    until (iter >= maxiter || (abs(v(1,:) - v_ant(1,:)) < epsilon && abs(v(2,:) - v_ant(2,:)) < epsilon))
-
+    until (iter >= maxiter || (norma(v(1,:),v_ant(1,:))^2 < epsilon && norma(v(2,:),v_ant(2,:))^2 < epsilon))
+    
     %Cargamos los 3 datos de ejemplo y comprobamos a que clase pertenece cada uno
     data = [];
     X = [];
